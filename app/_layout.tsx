@@ -1,24 +1,40 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { FavoritesProvider } from '@/hooks/use-favorites';
+import { ThemeProvider, useTheme } from '@/hooks/use-theme';
+import { LangProvider } from '@/hooks/use-lang';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+export const unstable_settings = { initialRouteName: 'splash', anchor: '(tabs)' };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+function AppStack() {
+  const { scheme } = useTheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        <Stack.Screen name="splash" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="recipe-detail" options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+    </NavThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <LangProvider>
+          <FavoritesProvider>
+            <AppStack />
+          </FavoritesProvider>
+        </LangProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
