@@ -1,4 +1,5 @@
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY ?? '';
+const GEMINI_API_KEY_2 = process.env.EXPO_PUBLIC_GEMINI_API_KEY_2 ?? '';
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
 export interface Recipe {
@@ -9,15 +10,27 @@ export interface Recipe {
   steps: string[];
 }
 
+async function fetchGemini(body: string, apiKey: string): Promise<Response> {
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-goog-api-key': apiKey },
+    body,
+  });
+}
+
+async function fetchWithFallback(body: string): Promise<Response> {
+  const res = await fetchGemini(body, GEMINI_API_KEY);
+  if (res.status === 429 && GEMINI_API_KEY_2) {
+    return fetchGemini(body, GEMINI_API_KEY_2);
+  }
+  return res;
+}
+
 async function callGemini(parts: object[]): Promise<Recipe[]> {
   if (!GEMINI_API_KEY) throw new Error('API key is missing.');
   let res: Response;
   try {
-    res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-goog-api-key': GEMINI_API_KEY },
-      body: JSON.stringify({ contents: [{ parts }] }),
-    });
+    res = await fetchWithFallback(JSON.stringify({ contents: [{ parts }] }));
   } catch {
     throw new Error('No internet connection.');
   }
@@ -75,13 +88,10 @@ export interface CookingTip {
 }
 
 export async function getCookingTips(): Promise<CookingTip[]> {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-goog-api-key': GEMINI_API_KEY },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: `Give 5 practical cooking tips or ingredient substitution ideas. Return ONLY a valid JSON array inside a \`\`\`json code block. Each object must have "title" (short, max 5 words) and "tip" (1-2 sentences) keys.` }] }],
-    }),
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: `Give 5 practical cooking tips or ingredient substitution ideas. Return ONLY a valid JSON array inside a \`\`\`json code block. Each object must have "title" (short, max 5 words) and "tip" (1-2 sentences) keys.` }] }],
   });
+  const res = await fetchWithFallback(body);
   const data = await res.json();
   const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
   const match = text.match(/\`\`\`json\s*([\s\S]*?)\`\`\`/) ?? text.match(/(\[[\s\S]*\])/);
@@ -96,13 +106,10 @@ export interface IngredientInfo {
 }
 
 export async function getIngredientInfo(ingredient: string): Promise<IngredientInfo | null> {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-goog-api-key': GEMINI_API_KEY },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: `Give info about the ingredient "${ingredient}". Return ONLY a valid JSON object inside a \`\`\`json code block with keys: "name" (string), "description" (1-2 sentences), "uses" (1 sentence), "pairsWith" (array of 4 ingredient strings).` }] }],
-    }),
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: `Give info about the ingredient "${ingredient}". Return ONLY a valid JSON object inside a \`\`\`json code block with keys: "name" (string), "description" (1-2 sentences), "uses" (1 sentence), "pairsWith" (array of 4 ingredient strings).` }] }],
   });
+  const res = await fetchWithFallback(body);
   const data = await res.json();
   const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
   const match = text.match(/\`\`\`json\s*([\s\S]*?)\`\`\`/) ?? text.match(/(\{[\s\S]*\})/);
