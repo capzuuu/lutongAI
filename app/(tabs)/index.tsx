@@ -1,3 +1,5 @@
+import { useRouter } from 'expo-router';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { RecipeCard } from '@/components/recipe-card';
 import { RecipeSkeleton } from '@/components/skeleton';
 import { Colors } from '@/constants/theme';
@@ -6,7 +8,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { detectIngredients } from '@/lib/detect-ingredients';
 import { getRecipesFromImage, getRecipesFromText, Recipe } from '@/lib/gemini';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image, SafeAreaView,
@@ -31,9 +33,33 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [lastAction, setLastAction] = useState<(() => void) | null>(null);
 
+  const [typedText, setTypedText] = useState('');
+
+  useEffect(() => {
+    const TYPEWRITER_TEXT = 'What ingredients do you have?';
+    let i = 0;
+    let interval: ReturnType<typeof setInterval>;
+
+    function startTyping() {
+      i = 0;
+      setTypedText('');
+      interval = setInterval(() => {
+        i++;
+        setTypedText(TYPEWRITER_TEXT.slice(0, i));
+        if (i >= TYPEWRITER_TEXT.length) clearInterval(interval);
+      }, 50);
+    }
+
+    startTyping();
+    const repeat = setInterval(startTyping, 30000);
+    return () => { clearInterval(interval); clearInterval(repeat); };
+  }, []);
+
   const { scheme } = useTheme();
   const { lang } = useLang();
   const C = Colors[scheme];
+
+  const router = useRouter();
 
   async function pickImage(useCamera: boolean) {
     const picker = useCamera ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
@@ -102,13 +128,15 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
+      <View style={[styles.header, { backgroundColor: C.background }]}>
+        <Image source={require('../../assets/images/splash-icon.png')} style={styles.headerLogo} resizeMode="contain" />
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity style={styles.profileBtn} onPress={() => router.push('/profile')}>
+          <MaterialIcons name="person" size={28} color={C.tint} />
+        </TouchableOpacity>
+      </View>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <Image source={require('../../assets/images/splash-icon.png')} style={styles.headerLogo} resizeMode="contain" />
-          <Text style={[styles.byline, { color: C.subtitle }]}>by: Joemar</Text>
-          <Text style={[styles.subtitle, { color: C.subtitle }]}>What ingredients do you have?</Text>
-        </View>
-
+        <Text style={[styles.subtitle, { color: C.subtitle }]}>{typedText}</Text>
         <TextInput
           style={[styles.input, { backgroundColor: C.card, color: C.text, borderColor: error ? '#e05c00' : C.border }]}
           placeholder="e.g. egg, tomato, rice, garlic..."
@@ -231,11 +259,12 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { padding: 20, paddingBottom: 40 },
-  header: { marginTop: 29, marginBottom: 8, alignItems: 'center' },
-  headerLogo: { width: 100, height: 100 },
-  subtitle: { fontSize: 15, textAlign: 'center', marginTop: 4, marginBottom: 0 },
-  byline: { fontSize: 11, textAlign: 'center', marginTop: 2, marginBottom: 16, opacity: 0.6 },
+  container: { padding: 20, paddingBottom: 40, paddingTop: 8 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingTop: 60, paddingBottom: 8, paddingHorizontal: 20 },
+  headerLogo: { width: 56, height: 56 },
+  profileBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  byline: { fontSize: 11, opacity: 0.6 },
+  subtitle: { fontSize: 14, fontWeight: '600', marginBottom: 8, textAlign: 'center' },
   input: {
     borderRadius: 12, padding: 14, fontSize: 15, borderWidth: 1,
     minHeight: 80, textAlignVertical: 'top', marginBottom: 12,

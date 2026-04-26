@@ -12,8 +12,10 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
+      <View style={[styles.header, { backgroundColor: C.background }]}>
+        <Text style={[styles.headerTitle, { color: C.tint }]}>❤️ Favorites</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={[styles.title, { color: C.tint }]}>❤️ Favorites</Text>
         {favorites.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>🍽️</Text>
@@ -29,8 +31,10 @@ export default function FavoritesScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { padding: 20, paddingBottom: 40 },
-  title: { fontSize: 28, fontWeight: '800', textAlign: 'center', marginTop: 26, marginBottom: 20 },
+  header: { paddingTop: 60, paddingBottom: 8, paddingHorizontal: 20 },
+  headerTitle: { fontSize: 22, fontWeight: '800' },
+  container: { padding: 20, paddingBottom: 40, paddingTop: 8 },
+  title: { fontSize: 28, fontWeight: '800', textAlign: 'center', marginBottom: 20 },
   empty: { alignItems: 'center', marginTop: 80 },
   emptyIcon: { fontSize: 48, marginBottom: 16 },
   emptyText: { fontSize: 15, textAlign: 'center', lineHeight: 24 },
