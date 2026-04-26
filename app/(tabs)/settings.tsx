@@ -24,9 +24,10 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
+      <View style={[styles.header, { backgroundColor: C.background }]}>
+        <Text style={[styles.headerTitle, { color: C.tint }]}>⚙️ Settings</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={[styles.title, { color: C.tint }]}>⚙️ Settings</Text>
-
         <View style={[styles.card, { backgroundColor: C.card, borderColor: C.border }]}>
           <View style={styles.row}>
             <View>
@@ -87,7 +88,7 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={styles.version}>v1.0.0</Text>
+        <Text style={styles.version}>v1.0.0-beta</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -95,8 +96,10 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  header: { paddingTop: 60, paddingBottom: 8, paddingHorizontal: 20 },
+  headerTitle: { fontSize: 22, fontWeight: '800' },
   container: { paddingBottom: 40, flexGrow: 1 },
-  title: { fontSize: 28, fontWeight: '800', textAlign: 'center', marginTop: 43, marginBottom: 24 },
+  title: { fontSize: 28, fontWeight: '800', textAlign: 'center', marginTop: 8, marginBottom: 24 },
   card: { marginHorizontal: 20, borderRadius: 12, borderWidth: 1, paddingHorizontal: 16 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14 },
   divider: { height: 1 },

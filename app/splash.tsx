@@ -82,7 +82,7 @@ export default function SplashScreen() {
 
       <Animated.View style={[styles.footer, { opacity: logoOpacity }]}>
         <Text style={styles.footerBy}>by: Joemar</Text>
-        <Text style={styles.footerVersion}>v1.0.0</Text>
+        <Text style={styles.footerVersion}>v1.0.0-beta</Text>
       </Animated.View>
     </Animated.View>
   );
