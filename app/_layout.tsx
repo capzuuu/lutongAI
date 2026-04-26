@@ -3,15 +3,20 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as SplashScreen from 'expo-splash-screen';
 
 import { FavoritesProvider } from '@/hooks/use-favorites';
 import { ThemeProvider, useTheme } from '@/hooks/use-theme';
 import { LangProvider } from '@/hooks/use-lang';
 
-export const unstable_settings = { initialRouteName: 'splash', anchor: '(tabs)' };
+SplashScreen.preventAutoHideAsync();
+SplashScreen.hideAsync();
+
+export const unstable_settings = { initialRouteName: 'splash' };
 
 function AppStack() {
   const { scheme } = useTheme();
+
   return (
     <NavThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -19,6 +24,7 @@ function AppStack() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         <Stack.Screen name="recipe-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="profile" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
     </NavThemeProvider>
